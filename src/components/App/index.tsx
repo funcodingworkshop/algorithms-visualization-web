@@ -1,5 +1,15 @@
 import React from "react";
+import { chartDivId, drawChart } from "./drawChart";
 
-const App: React.FC = () => <div>Hello world!</div>;
+export default function App() {
+  React.useEffect(() => {
+    drawChart();
+  }, []);
 
-export default App;
+  return (
+    <div>
+      <h3>Hello world!</h3>
+      <div id={chartDivId}/>
+    </div>
+  );
+}
