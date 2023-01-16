@@ -7,9 +7,8 @@ export default function App() {
   }, []);
 
   return (
-    <div>
-      <h3>Hello world!</h3>
-      <div id={chartDivId}/>
+    <div style={{ width: 800, height: 800 }}>
+      <div id={chartDivId} />
     </div>
   );
 }
