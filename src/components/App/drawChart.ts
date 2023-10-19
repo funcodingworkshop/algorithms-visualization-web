@@ -5,12 +5,17 @@ import { UniformHeatmapRenderableSeries } from "scichart/Charting/Visuals/Render
 import { HeatmapColorMap } from "scichart/Charting/Visuals/RenderableSeries/HeatmapColorMap";
 import { createBfs } from "../../algorithms/bfs2";
 import { NumberRange } from "scichart/Core/NumberRange";
+import { mazeInput } from "./input";
 
 export const chartDivId = "chart1";
 
-const rows = 30;
-const cols = 30;
-const timeout = 10;
+const MAZE_MATRIX = mazeInput.split(/\n/).map((e) => e.split("").map((t) => parseInt(t)));
+console.log("MAZE_MATRIX", MAZE_MATRIX);
+const ROWS = MAZE_MATRIX.length;
+console.log("ROWS", ROWS);
+const COLS = MAZE_MATRIX[0].length;
+console.log("COLS", COLS);
+const timeout = 20;
 
 export async function drawChart() {
   const { sciChartSurface, wasmContext } = await SciChartSurface.create(chartDivId);
@@ -39,17 +44,12 @@ export async function drawChart() {
   sciChartSurface.xAxes.add(xAxis);
   sciChartSurface.yAxes.add(yAxis);
 
-  const initialZValues: number[][] = Array(rows)
-    .fill(undefined)
-    .map(() => Array(cols).fill(0));
-
-  console.log(initialZValues);
   const heatmapDataSeries = new UniformHeatmapDataSeries(wasmContext, {
     xStart: 0,
     xStep: 1,
     yStart: 0,
     yStep: 1,
-    zValues: initialZValues,
+    zValues: MAZE_MATRIX,
   });
 
   const heatmapSeries = new UniformHeatmapRenderableSeries(wasmContext, {
@@ -59,23 +59,34 @@ export async function drawChart() {
       minimum: 0,
       maximum: 1,
       gradientStops: [
-        { offset: 1, color: "#FF000055" },
+        { offset: 1, color: "#335da9" },
+        { offset: 0.5, color: "#FF000055" },
         { offset: 0, color: "#00000055" },
       ],
     }),
   });
 
-  const nextBfs = createBfs(rows, cols);
+  const nextBfs = createBfs(MAZE_MATRIX, { r: 1, c: 2 }, { r: 9, c: 0 });
 
-  const updateChart = () => {
+  // const updateChart = () => {
+  //   const newVal = nextBfs();
+  //   if (newVal !== undefined) {
+  //     heatmapDataSeries.setZValue(newVal.r, newVal.c, 0.5);
+  //     setTimeout(updateChart, timeout);
+  //   }
+  // };
+
+  // updateChart();
+
+  const updateChartClick = () => {
     const newVal = nextBfs();
     if (newVal !== undefined) {
-      heatmapDataSeries.setZValue(newVal.r, newVal.c, 1);
-      setTimeout(updateChart, timeout);
+      heatmapDataSeries.setZValue(newVal.r, newVal.c, 0.5);
     }
   };
 
-  updateChart();
-
   sciChartSurface.renderableSeries.add(heatmapSeries);
+
+  return { updateChartClick };
 }
+
