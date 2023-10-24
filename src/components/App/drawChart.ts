@@ -1,10 +1,19 @@
-import { SciChartSurface } from "scichart/Charting/Visuals/SciChartSurface";
-import { NumericAxis } from "scichart/Charting/Visuals/Axis/NumericAxis";
-import { UniformHeatmapDataSeries } from "scichart/Charting/Model/UniformHeatmapDataSeries";
-import { UniformHeatmapRenderableSeries } from "scichart/Charting/Visuals/RenderableSeries/UniformHeatmapRenderableSeries";
-import { HeatmapColorMap } from "scichart/Charting/Visuals/RenderableSeries/HeatmapColorMap";
+import {
+  SciChartSurface,
+  NumericAxis,
+  UniformHeatmapDataSeries,
+  UniformHeatmapRenderableSeries,
+  HeatmapColorMap,
+  NumberRange,
+  NativeTextAnnotation,
+  TextAnnotation,
+  ECoordinateMode,
+  EHorizontalAnchorPoint,
+  EVerticalAnchorPoint,
+  Thickness,
+  EAnnotationLayer,
+} from "scichart";
 import { createBfs } from "../../algorithms/bfs2";
-import { NumberRange } from "scichart/Core/NumberRange";
 import { mazeInput } from "./input";
 
 export const chartDivId = "chart1";
@@ -18,7 +27,9 @@ console.log("COLS", COLS);
 const timeout = 20;
 
 export async function drawChart() {
-  const { sciChartSurface, wasmContext } = await SciChartSurface.create(chartDivId);
+  const { sciChartSurface, wasmContext } = await SciChartSurface.create(chartDivId, {
+    // padding: new Thickness(0, 0, 0, 0),
+  });
 
   // Create an X,Y Axis and add to the chart
   const xAxis = new NumericAxis(wasmContext, {
@@ -66,7 +77,7 @@ export async function drawChart() {
     }),
   });
 
-  const nextBfs = createBfs(MAZE_MATRIX, { r: 1, c: 2 }, { r: 9, c: 0 });
+  const nextBfs = createBfs(MAZE_MATRIX, { r: 1, c: 2, step: 0 }, { r: 9, c: 0, step: 0 });
 
   // const updateChart = () => {
   //   const newVal = nextBfs();
@@ -81,11 +92,31 @@ export async function drawChart() {
   const updateChartClick = () => {
     const newVal = nextBfs();
     if (newVal !== undefined) {
-      heatmapDataSeries.setZValue(newVal.r, newVal.c, 0.5);
+      const { r, c, step } = newVal;
+      heatmapDataSeries.setZValue(r, c, 0.5);
+      const annotation = new NativeTextAnnotation({
+        x1: c / COLS,
+        y1: (ROWS - r - 1) / ROWS,
+        xCoordinateMode: ECoordinateMode.Relative,
+        yCoordinateMode: ECoordinateMode.Relative,
+        horizontalAnchorPoint: EHorizontalAnchorPoint.Left,
+        verticalAnchorPoint: EVerticalAnchorPoint.Top,
+        textColor: "white",
+        fontSize: 26,
+        text: step.toString()
+      });
+      sciChartSurface.annotations.add(annotation);
     }
   };
 
   sciChartSurface.renderableSeries.add(heatmapSeries);
+  // const nativeTextRemote = new NativeTextAnnotation({
+  //   x1: 100,
+  //   y1: 100,
+  //   text: "Test",
+  //   fontSize: 24,
+  //   textColor: 'white'
+  // });
 
   return { updateChartClick };
 }

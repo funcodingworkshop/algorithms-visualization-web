@@ -36,6 +36,8 @@ module.exports = {
       patterns: [
         { from: "node_modules/scichart/_wasm/scichart2d.data", to: "" },
         { from: "node_modules/scichart/_wasm/scichart2d.wasm", to: "" },
+        { from: "build_wasm/alg.js", to: "" },
+        { from: "build_wasm/alg.wasm", to: "" },
       ],
     }),
   ],

@@ -1,1 +1,1 @@
-export type TPoint = { r: number; c: number };
+export type TPoint = { r: number; c: number; step: number };
