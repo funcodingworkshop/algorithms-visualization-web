@@ -7,6 +7,7 @@ Install Emscripten Compiler
 Install latest version of emscripten compiler https://emscripten.org/docs/getting_started/downloads.html
 
 Run source emsdk_env.sh to set env variables
+`source ./emsdk_env.sh `
 
 Development mode
 

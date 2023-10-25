@@ -14,10 +14,10 @@ export default function App() {
 
   const handleTestFib = () => {
     if (algModule) {
-      const res: TIntVector = algModule.intFib(5);
-      console.log("Fib res size", res.size());
-      for (let i=0; i<res.size(); i++) {
-        console.log(i);
+      const res: TIntVector = algModule.run_alg();
+      console.log("res size", res.size());
+      for (let i=0; i<res.size(); i+=3) {
+        console.log(`row ${res.get(i)} col ${res.get(i+1)} step ${res.get(i+2)}`);
       }
     }
   }
