@@ -3,6 +3,7 @@
 #include <deque>
 #include <map>
 #include <emscripten/bind.h>
+// #include <iostream>
 
 using namespace std;
 
@@ -15,6 +16,17 @@ typedef struct {
 	int col;
 	int step;
 } row_col_step_struct;
+
+// template <typename T>
+// void print_vec(vector<T> &vec)
+// {
+//     for (auto v : vec) {
+//         for (auto c : v)
+//             cout << c << " ";
+//         cout << endl;
+//     }
+//     cout << endl;
+// }
 
 vector<int> run_alg() {
 	int ROWS = 19;
@@ -31,12 +43,15 @@ vector<int> run_alg() {
 		maze_matrix.push_back(maze_line);
     }
 
+    // print_vec<vector<bool>>(maze_matrix);
+
 	map<row_col_pair,row_col_pair> visited_prev_map;
 	deque<row_col_step_struct> bfs_queue;
 
 	row_col_step_struct start_pos = {1, 2, 0};
 	row_col_step_struct end_pos1 = {9, 0, 0};
 	row_col_step_struct end_pos2 = {9, 20, 0};
+	visited_prev_map.insert({{start_pos.row, start_pos.col}, {start_pos.row, start_pos.col}});
 	bfs_queue.push_back(start_pos);
 	size_t queue_index = 0;
 
@@ -54,6 +69,7 @@ vector<int> run_alg() {
 				&& maze_matrix[(size_t)row][(size_t)col]==0 && !visited_prev_map.count({row, col})) {
 				visited_prev_map.insert({{row,col}, {s.row, s.col}});
 				row_col_step_struct new_element = { row, col, s.step + 1};
+				// cout << "row " << row << " col " << col << " step " << s.step + 1 << endl;
 				bfs_queue.push_back(new_element);
 			}
 		}
@@ -61,9 +77,12 @@ vector<int> run_alg() {
 	}
 	while (queue_index < bfs_queue.size());
 
+	// cout << "queue_index " << queue_index << endl;
+
 	vector<int> res;
 	for (i=0; i<=queue_index; ++i) {
 		row_col_step_struct s = bfs_queue[i];
+		// cout << "s.row " << s.row << " s.col " << s.col << " s.step " << s.step << endl;
 		res.push_back(s.row);
 		res.push_back(s.col);
 		res.push_back(s.step);
@@ -77,6 +96,14 @@ vector<int> run_alg() {
 	// }
 	// while (r.first != start_pos.row || r.second != start_pos.col );
 }
+
+// int main() {
+// 	vector<int> r = run_alg();
+// 	cout << "vector size " << r.size() << endl;
+// 	for (int i=0; i<r.size(); i+=3){
+// 		cout << "i " << i << " r[i] " << r[i] << " " << r[i+1] << " " << r[i+2] << endl;
+// 	}
+// }
 
 string input()
 {

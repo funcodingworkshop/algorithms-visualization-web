@@ -1,26 +1,37 @@
 import React from "react";
-import { chartDivId, drawChart } from "./drawChart";
+import { chartDivId, drawChartCPP } from "./drawChartCPP";
 import { TModule } from "../../types/TModule";
 import { TIntVector } from "../../types/TIntVector";
 
 export default function App() {
-  const [nextFn, setNextFn] = React.useState<{ updateChartClick: Function }>({ updateChartClick: () => undefined });
-  const [algModule, setAlgModule] = React.useState<TModule>();  
+  const [methods, setMethods] = React.useState<{ next: (r: number, c: number, step: number) => void }>();
+  const [algRes, setAlgRes] = React.useState<TIntVector>();
+  const [algResSize, setAlgResSize] = React.useState<number>(0);
+  const [cnt, setCnt] = React.useState<number>(0);
+
   React.useEffect(() => {
-    drawChart().then((r) => setNextFn(r));
+    drawChartCPP().then((r) => setMethods(r));
     // @ts-ignore
-    setAlgModule(Module);
+    const algModule: TModule = Module;
+    setTimeout(() => {
+      const res: TIntVector = algModule.run_alg();
+      setAlgRes(res);
+      setAlgResSize(Math.floor(res.size() / 3));
+    }, 200);
   }, []);
 
-  const handleTestFib = () => {
-    if (algModule) {
-      const res: TIntVector = algModule.run_alg();
-      console.log("res size", res.size());
-      for (let i=0; i<res.size(); i+=3) {
-        console.log(`row ${res.get(i)} col ${res.get(i+1)} step ${res.get(i+2)}`);
-      }
+  const isFinished = cnt >= algResSize;
+
+  const handleNextClick = () => {
+    if (methods && algRes && !isFinished) {
+      const index = cnt * 3;
+      const row = algRes.get(index);
+      const col = algRes.get(index + 1);
+      const step = algRes.get(index + 2);
+      methods.next(row, col, step);
+      setCnt(cnt + 1);
     }
-  }
+  };
 
   return (
     <div style={{ display: "flex" }}>
@@ -29,18 +40,10 @@ export default function App() {
       </div>
       <div style={{ padding: 10 }}>
         <button
-          style={{ fontSize: 20, backgroundColor: "#335da9", color: "white" }}
-          onClick={() => nextFn.updateChartClick()}
+          style={{ fontSize: 20, backgroundColor: isFinished ? "grey" : "#335da9", color: "white" }}
+          onClick={handleNextClick}
         >
-          NEXT
-        </button>
-      </div>
-      <div style={{ padding: 10 }}>
-        <button
-          style={{ fontSize: 20, backgroundColor: "#335da9", color: "white" }}
-          onClick={handleTestFib}
-        >
-          Test Fibonacci
+          {isFinished ? "END" : "NEXT"}
         </button>
       </div>
     </div>
