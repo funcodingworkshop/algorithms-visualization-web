@@ -1,5 +1,6 @@
 #include <sstream>
 #include <vector>
+#include <deque>
 #include <map>
 #include <emscripten/bind.h>
 // #include <iostream>
@@ -15,6 +16,17 @@ typedef struct {
 	int col;
 	int step;
 } row_col_step_struct;
+
+// template <typename T>
+// void print_vec(vector<T> &vec)
+// {
+//     for (auto v : vec) {
+//         for (auto c : v)
+//             cout << c << " ";
+//         cout << endl;
+//     }
+//     cout << endl;
+// }
 
 vector<int> run_alg() {
 	int ROWS = 19;
@@ -34,21 +46,19 @@ vector<int> run_alg() {
     // print_vec<vector<bool>>(maze_matrix);
 
 	map<row_col_pair,row_col_pair> visited_prev_map;
-	vector<row_col_step_struct> dfs_queue;
-	vector<row_col_step_struct> dfs_res;
+	deque<row_col_step_struct> bfs_queue;
 
 	row_col_step_struct start_pos = {1, 2, 0};
 	row_col_step_struct end_pos1 = {9, 0, 0};
 	row_col_step_struct end_pos2 = {9, 20, 0};
 	visited_prev_map.insert({{start_pos.row, start_pos.col}, {start_pos.row, start_pos.col}});
-	dfs_queue.push_back(start_pos);
+	bfs_queue.push_back(start_pos);
+	size_t queue_index = 0;
 
-	vector<pair<int,int>> adj_cells = {{0,-1}, {-1,0}, {0,1}, {1,0}};
+	vector<pair<int,int>> adj_cells = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
 
 	do {
-		row_col_step_struct s = dfs_queue.back();
-		dfs_res.push_back(s);
-		dfs_queue.pop_back();
+		row_col_step_struct s = bfs_queue[queue_index];
 		if ((s.row == end_pos1.row && s.col == end_pos1.col)
 			|| (s.row == end_pos2.row && s.col == end_pos2.col)) break;
 
@@ -60,17 +70,18 @@ vector<int> run_alg() {
 				visited_prev_map.insert({{row,col}, {s.row, s.col}});
 				row_col_step_struct new_element = { row, col, s.step + 1};
 				// cout << "row " << row << " col " << col << " step " << s.step + 1 << endl;
-				dfs_queue.push_back(new_element);
+				bfs_queue.push_back(new_element);
 			}
 		}
+		queue_index++;
 	}
-	while (dfs_queue.size());
+	while (queue_index < bfs_queue.size());
 
 	// cout << "queue_index " << queue_index << endl;
 
 	vector<int> res;
-	for (i=0; i<=dfs_res.size() - 1; ++i) {
-		row_col_step_struct s = dfs_res[i];
+	for (i=0; i<=queue_index; ++i) {
+		row_col_step_struct s = bfs_queue[i];
 		// cout << "s.row " << s.row << " s.col " << s.col << " s.step " << s.step << endl;
 		res.push_back(s.row);
 		res.push_back(s.col);
@@ -78,7 +89,7 @@ vector<int> run_alg() {
 	}
 
 	return res;
-	// row_col_step_struct e = dfs_queue[queue_index];
+	// row_col_step_struct e = bfs_queue[queue_index];
 	// row_col_pair r = { e.row, e.col };
 	// do {
 	// 	r = visited_prev_map.find(r)->second;
@@ -123,3 +134,34 @@ EMSCRIPTEN_BINDINGS(module) {
 
 	emscripten::register_vector<int>("vector<int>");
 }
+
+// WORKING BASIC EXAMPLE
+// #include <emscripten/bind.h>
+// #include <vector>
+
+// using namespace std;
+
+// vector<int> intFib(int n)
+// {
+// 	vector<int> ints;
+
+// 	if (n>=1)
+// 		ints.push_back(0);
+// 	if (n>=2)
+// 		ints.push_back(1);
+// 	int prev1 = 1;
+// 	int prev2 = 0;
+// 	for (int i=3; i<=n; ++i) {
+// 		int next = prev1 + prev2;
+// 		ints.push_back(next);
+// 		prev2 = prev1;
+// 		prev1 = next;
+// 	}
+// 	return ints;
+// }
+
+// EMSCRIPTEN_BINDINGS(module) {
+// 	emscripten::function("intFib", &intFib);
+
+// 	emscripten::register_vector<int>("vector<int>");
+// }

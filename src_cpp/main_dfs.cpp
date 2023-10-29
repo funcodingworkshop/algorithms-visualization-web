@@ -69,7 +69,7 @@ vector<int> run_alg() {
 	// cout << "queue_index " << queue_index << endl;
 
 	vector<int> res;
-	for (i=0; i<=dfs_res.size() - 1; ++i) {
+	for (i=0; i<=dfs_res.size(); ++i) {
 		row_col_step_struct s = dfs_res[i];
 		// cout << "s.row " << s.row << " s.col " << s.col << " s.step " << s.step << endl;
 		res.push_back(s.row);
